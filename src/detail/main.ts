@@ -1,7 +1,6 @@
-import App from "./Detail.svelte";
+import { mount } from 'svelte';
+import Detail from './Detail.svelte';
 
-const app = new App({
-  target: document.getElementById("app")!,
-});
+const app = mount(Detail, { target: document.getElementById('app')! });
 
 export default app;

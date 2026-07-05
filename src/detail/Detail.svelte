@@ -47,7 +47,7 @@
       refreshTimer = window.setTimeout(refresh, 500);
     });
   });
-  onDestroy(() => { unlisten?.(); plot?.destroy(); });
+  onDestroy(() => { if (refreshTimer) window.clearTimeout(refreshTimer); unlisten?.(); plot?.destroy(); });
 </script>
 
 <h2>今日明细</h2>

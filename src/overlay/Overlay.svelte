@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/core";
+  import { getCurrentWindow } from "@tauri-apps/api/window";
   import { formatTokens, formatUsd, formatCny } from "../lib/format";
 
   interface UsageSummary {
@@ -18,7 +19,6 @@
   let dbOk = false;
   let dbMessage = "";
   let usdToCny: number = 7.2;
-  let showCostCny: boolean = false;
 
   async function loadSettings() {
     try {
@@ -54,6 +54,17 @@
     }
   }
 
+  // Explicit drag: more robust than the data-tauri-drag-region attribute.
+  // Skip when the press lands on the interactive cost button (let its click fire).
+  async function startDrag(e: MouseEvent) {
+    if ((e.target as HTMLElement)?.closest("button")) return;
+    try {
+      await getCurrentWindow().startDragging();
+    } catch (err) {
+      console.error("startDragging failed:", err);
+    }
+  }
+
   onMount(() => {
     loadSettings();
 
@@ -73,10 +84,7 @@
     <button on:click={pickDbPath}>重新定位</button>
   </div>
 {:else}
-  <div class="card" data-tauri-drag-region>
-    {#if summary && summary.unpriced_rows > 0}
-      <div class="warn">⚠ {summary.unpriced_rows} 条未定价</div>
-    {/if}
+  <div class="card" on:mousedown={startDrag}>
     <div class="metric">
       <span class="metric-label">Tokens</span>
       <span class="metric-value">{summary ? formatTokens(summary.input_tokens + summary.output_tokens + summary.cache_read_tokens + summary.cache_creation_tokens) : "—"}</span>
@@ -87,14 +95,10 @@
         class="metric-value clickable"
         on:click={openDetailWindow}
         title="Click to open detail window"
-        data-tauri-drag-region="false"
       >
         {#if summary}
-          {#if showCostCny}
-            {formatCny(summary.total_cost_usd, usdToCny)}
-          {:else}
-            {formatUsd(summary.total_cost_usd)}
-          {/if}
+          <span class="cost-usd">{formatUsd(summary.total_cost_usd)}</span>
+          <span class="cost-cny">{formatCny(summary.total_cost_usd, usdToCny)}</span>
         {:else}
           —
         {/if}

@@ -84,8 +84,20 @@ body:active {
 
 .metric-value.clickable {
   cursor: pointer;
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
 }
 
 .metric-value.clickable:hover {
   color: #4a9eff;
+}
+
+.cost-usd {
+  color: #7cc4ff;
+}
+
+.cost-cny {
+  color: #ffc97c;
+  font-size: 13px;
 }

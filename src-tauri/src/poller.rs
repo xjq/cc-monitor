@@ -4,7 +4,7 @@ use tauri::{AppHandle, Emitter};
 use crate::{config, db};
 
 pub fn spawn(app: AppHandle) {
-    tokio::spawn(async move {
+    tauri::async_runtime::spawn(async move {
         let cfg = config::load(&app);
         let interval = Duration::from_secs(cfg.poll_interval_sec.max(1));
         loop {

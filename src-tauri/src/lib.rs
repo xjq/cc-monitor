@@ -8,7 +8,7 @@ mod poller;
 use std::time::Duration;
 use tauri::{
     menu::{Menu, MenuItem},
-    tray::TrayIconBuilder,
+    tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
     Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
 
@@ -42,7 +42,14 @@ fn build_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
             "quit" => app.exit(0),
             _ => {}
         })
-        .on_tray_icon_event(|tray, _e| {
+        .on_tray_icon_event(|tray, e| {
+            if let TrayIconEvent::Click { button, .. } = e {
+                if button != MouseButton::Left {
+                    return;
+                }
+            } else {
+                return;
+            }
             let app = tray.app_handle();
             if let Some(w) = app.get_webview_window("overlay") {
                 if w.is_visible().unwrap_or(false) {

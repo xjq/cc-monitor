@@ -55,18 +55,28 @@ pub async fn show_detail_window(app: AppHandle) -> Result<(), String> {
 #[tauri::command]
 pub fn pick_db_path(app: AppHandle) -> Result<bool, String> {
     use tauri_plugin_dialog::DialogExt;
-    let app_clone = app.clone();
+
+    // Use a channel to convert callback to synchronous result
+    let (tx, rx) = std::sync::mpsc::channel();
+
     app.dialog()
         .file()
         .add_filter("SQLite DB", &["db"])
         .pick_file(move |path| {
-            let result = path.map(|f| f.into_path().ok()).flatten()
+            let picked = path.map(|f| f.into_path().ok()).flatten()
                 .map(|p| p.to_string_lossy().to_string());
-            if let Some(p) = result {
-                relocate_db_inner(&app_clone, p);
-            }
+            let _ = tx.send(picked);
         });
-    Ok(true)
+
+    // Block waiting for the callback (this is OK in a command context)
+    match rx.recv() {
+        Ok(Some(p)) => {
+            let success = relocate_db_inner(&app, p);
+            Ok(success)
+        }
+        Ok(None) => Ok(false),
+        Err(_) => Ok(false),
+    }
 }
 
 #[tauri::command]

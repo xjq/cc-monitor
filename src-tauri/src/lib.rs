@@ -1,5 +1,6 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 mod config;
+mod db;
 mod models;
 
 #[tauri::command]

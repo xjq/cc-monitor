@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/core";
-  import { formatTokens, formatHours, formatCurrency } from "../lib/format";
+  import { formatTokens, formatHours, formatUsd, formatCny } from "../lib/format";
 
   interface Summary {
     tokens: number;
@@ -11,11 +11,10 @@
   }
 
   let summary: Summary | null = null;
+  let dbOk = false;
+  let dbMessage = "";
   let usdToCny: number = 7.2;
   let showCostCny: boolean = false;
-
-  let dragStartX = 0;
-  let dragStartY = 0;
 
   async function loadSettings() {
     try {
@@ -27,7 +26,11 @@
   }
 
   async function handleDbStatus(event: any) {
-    summary = event.payload;
+    dbOk = event.payload.found === true;
+    dbMessage = event.payload.message || "";
+    if (event.payload.found) {
+      summary = event.payload.summary;
+    }
   }
 
   async function handleUsageUpdate(event: any) {
@@ -42,16 +45,11 @@
     }
   }
 
-  function onMouseDown(e: MouseEvent) {
-    dragStartX = e.screenX;
-    dragStartY = e.screenY;
-  }
-
-  function onMouseUp(e: MouseEvent) {
-    const dx = e.screenX - dragStartX;
-    const dy = e.screenY - dragStartY;
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-      invoke("save_overlay_position", { x: e.screenX, y: e.screenY });
+  async function pickDbPath() {
+    try {
+      await invoke("pick_db_path");
+    } catch (e) {
+      console.error("Failed to pick DB path:", e);
     }
   }
 
@@ -68,37 +66,41 @@
   });
 </script>
 
-<div
-  class="overlay"
-  onmousedown={onMouseDown}
-  onmouseup={onMouseUp}
->
-  <div class="metric">
-    <span class="metric-label">Tokens</span>
-    <span class="metric-value">{summary ? formatTokens(summary.tokens) : "—"}</span>
+{#if !dbOk}
+  <div class="error-state">
+    <span>{dbMessage || "cc-switch.db 未找到"}</span>
+    <button on:click={pickDbPath}>重新定位</button>
   </div>
-  <div class="metric">
-    <span class="metric-label">Cost</span>
-    <span
-      class="metric-value clickable"
-      onclick={openDetailWindow}
-      title="Click to open detail window"
-    >
-      {#if summary}
-        {#if showCostCny}
-          {formatCurrency(summary.cost_usd, "CNY", usdToCny)}
+{:else}
+  <div class="card" data-tauri-drag-region>
+    <div class="metric">
+      <span class="metric-label">Tokens</span>
+      <span class="metric-value">{summary ? formatTokens(summary.tokens) : "—"}</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Cost</span>
+      <button
+        class="metric-value clickable"
+        on:click={openDetailWindow}
+        title="Click to open detail window"
+        data-tauri-drag-region="false"
+      >
+        {#if summary}
+          {#if showCostCny}
+            {formatCny(summary.cost_usd, usdToCny)}
+          {:else}
+            {formatUsd(summary.cost_usd)}
+          {/if}
         {:else}
-          {formatCurrency(summary.cost_usd, "USD")}
+          —
         {/if}
-      {:else}
-        —
-      {/if}
-    </span>
+      </button>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Hours</span>
+      <span class="metric-value">{summary ? formatHours(summary.hours) : "—"}</span>
+    </div>
   </div>
-  <div class="metric">
-    <span class="metric-label">Hours</span>
-    <span class="metric-value">{summary ? formatHours(summary.hours) : "—"}</span>
-  </div>
-</div>
+{/if}
 
 <style src="./app.css"></style>

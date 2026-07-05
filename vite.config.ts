@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { resolve } from "path";
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
@@ -10,9 +11,9 @@ export default defineConfig(async () => ({
   build: {
     rollupOptions: {
       input: {
-        index: "src/index.html",
-        overlay: "src/overlay.html",
-        detail: "src/detail.html",
+        index: resolve(__dirname, 'index.html'),
+        overlay: resolve(__dirname, 'overlay.html'),
+        detail: resolve(__dirname, 'detail.html'),
       },
     },
   },

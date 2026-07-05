@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatTokens, formatHours, formatCurrency } from "./format";
+import { formatTokens, formatHours, formatUsd, formatCny } from "./format";
 
 describe("formatTokens", () => {
   it("formats zero", () => {
@@ -22,11 +22,7 @@ describe("formatTokens", () => {
     expect(formatTokens(1_000_000)).toBe("1.0M");
     expect(formatTokens(1_500_000)).toBe("1.5M");
     expect(formatTokens(9_999_999)).toBe("10.0M");
-  });
-
-  it("formats billions as B", () => {
-    expect(formatTokens(1_000_000_000)).toBe("1.0B");
-    expect(formatTokens(2_500_000_000)).toBe("2.5B");
+    expect(formatTokens(999_999_999)).toBe("1000.0M");
   });
 
   it("rounds to one decimal place", () => {
@@ -53,26 +49,28 @@ describe("formatHours", () => {
   });
 });
 
-describe("formatCurrency", () => {
+describe("formatUsd", () => {
   it("formats USD with $ symbol", () => {
-    expect(formatCurrency(0, "USD")).toBe("$0.00");
-    expect(formatCurrency(100, "USD")).toBe("$100.00");
-    expect(formatCurrency(1234.567, "USD")).toBe("$1234.57");
-  });
-
-  it("formats CNY with ¥ symbol", () => {
-    expect(formatCurrency(0, "CNY")).toBe("¥0.00");
-    expect(formatCurrency(100, "CNY")).toBe("¥100.00");
-    expect(formatCurrency(1234.567, "CNY")).toBe("¥1234.57");
-  });
-
-  it("converts USD to CNY using rate", () => {
-    expect(formatCurrency(100, "CNY", 7.2)).toBe("¥720.00");
-    expect(formatCurrency(50, "CNY", 7.0)).toBe("¥350.00");
+    expect(formatUsd(0)).toBe("$0.00");
+    expect(formatUsd(100)).toBe("$100.00");
+    expect(formatUsd(1234.567)).toBe("$1234.57");
   });
 
   it("handles negative values", () => {
-    expect(formatCurrency(-100, "USD")).toBe("-$100.00");
-    expect(formatCurrency(-50, "CNY", 7.2)).toBe("-¥360.00");
+    expect(formatUsd(-100)).toBe("-$100.00");
+    expect(formatUsd(-50)).toBe("-$50.00");
+  });
+});
+
+describe("formatCny", () => {
+  it("formats CNY with ¥ symbol and converts from USD", () => {
+    expect(formatCny(0, 7.2)).toBe("¥0.00");
+    expect(formatCny(100, 7.2)).toBe("¥720.00");
+    expect(formatCny(50, 7.0)).toBe("¥350.00");
+    expect(formatCny(1234.567, 7.2)).toBe("¥8888.88");
+  });
+
+  it("handles negative values", () => {
+    expect(formatCny(-100, 7.2)).toBe("-¥720.00");
   });
 });

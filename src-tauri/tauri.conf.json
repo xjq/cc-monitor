@@ -10,7 +10,31 @@
     "frontendDist": "../build"
   },
   "app": {
-    "windows": [],
+    "windows": [
+      {
+        "label": "overlay",
+        "title": "cc-monitor Overlay",
+        "width": 300,
+        "height": 80,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "url": "overlay.html"
+      },
+      {
+        "label": "detail",
+        "title": "cc-monitor Detail",
+        "width": 800,
+        "height": 600,
+        "decorations": true,
+        "transparent": false,
+        "alwaysOnTop": false,
+        "skipTaskbar": false,
+        "url": "detail.html",
+        "visible": false
+      }
+    ],
     "security": {
       "csp": null
     }

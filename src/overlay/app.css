@@ -1,0 +1,103 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: transparent;
+  color: #fff;
+  overflow: hidden;
+  user-select: none;
+  cursor: grab;
+}
+
+body:active {
+  cursor: grabbing;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  background: rgba(20, 20, 28, 0.85);
+  color: #eee;
+  border-radius: 12px;
+  width: 220px;
+  height: 70px;
+  flex-direction: column;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+}
+
+.error-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(20, 20, 28, 0.85);
+  color: #ff6b6b;
+  border-radius: 12px;
+  font-size: 12px;
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.error-state button {
+  background: #4a9eff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.warn {
+  font-size: 10px;
+  color: #ffb347;
+  position: absolute;
+  top: 2px;
+  right: 6px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.metric-label {
+  font-size: 10px;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.metric-value.clickable {
+  cursor: pointer;
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.metric-value.clickable:hover {
+  color: #4a9eff;
+}
+
+.cost-usd {
+  color: #7cc4ff;
+}
+
+.cost-cny {
+  color: #ffc97c;
+  font-size: 13px;
+}

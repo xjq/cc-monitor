@@ -3,7 +3,7 @@
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/core";
   import { getCurrentWindow } from "@tauri-apps/api/window";
-  import { formatTokens, formatUsd, formatCny } from "../lib/format";
+  import { formatTokens, formatCny } from "../lib/format";
 
   interface UsageSummary {
     input_tokens: number;
@@ -85,23 +85,16 @@
   </div>
 {:else}
   <div class="card" on:mousedown={startDrag}>
-    <div class="metric">
-      <span class="metric-label">Tokens</span>
-      <span class="metric-value">{summary ? formatTokens(summary.input_tokens + summary.output_tokens + summary.cache_read_tokens + summary.cache_creation_tokens) : "—"}</span>
-    </div>
-    <div class="metric">
-      <span class="metric-label">Cost</span>
+    <div class="screen">
+      <div class="line tokens">
+        {summary ? formatTokens(summary.input_tokens + summary.output_tokens + summary.cache_read_tokens + summary.cache_creation_tokens) : "—"}
+      </div>
       <button
-        class="metric-value clickable"
+        class="line cny clickable"
         on:click={openDetailWindow}
         title="Click to open detail window"
       >
-        {#if summary}
-          <span class="cost-usd">{formatUsd(summary.total_cost_usd)}</span>
-          <span class="cost-cny">{formatCny(summary.total_cost_usd, usdToCny)}</span>
-        {:else}
-          —
-        {/if}
+        {summary ? formatCny(summary.total_cost_usd, usdToCny) : "—"}
       </button>
     </div>
   </div>

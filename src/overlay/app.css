@@ -5,9 +5,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Consolas", "Courier New", "Lucida Console", monospace;
   background: transparent;
-  color: #fff;
   overflow: hidden;
   user-select: none;
   cursor: grab;
@@ -17,20 +16,14 @@ body:active {
   cursor: grabbing;
 }
 
+/* Outer shell = calculator body / bezel around the LCD. */
 .card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 12px;
-  background: rgba(20, 20, 28, 0.85);
-  color: #eee;
-  border-radius: 12px;
-  width: 220px;
-  height: 70px;
-  flex-direction: column;
-  justify-content: center;
-  -webkit-backdrop-filter: blur(6px);
-  position: relative;
+  width: 260px;
+  height: 96px;
+  padding: 6px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2c2c2c, #161616);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 
 .error-state {
@@ -38,11 +31,10 @@ body:active {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(20, 20, 28, 0.85);
+  background: linear-gradient(180deg, #2c2c2c, #161616);
   color: #ff6b6b;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 12px;
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .error-state button {
@@ -55,49 +47,67 @@ body:active {
   font-size: 11px;
 }
 
-.warn {
-  font-size: 10px;
-  color: #ffb347;
-  position: absolute;
-  top: 2px;
-  right: 6px;
-}
-
-.metric {
+/* The LCD glass: recessed, olive-gray, with an inner bevel + glare. */
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 8px 12px;
+  border-radius: 3px;
+  background: #a8b59a;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.12),
+    inset 1px 1px 4px rgba(0, 0, 0, 0.35),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.25);
 }
 
-.metric-label {
-  font-size: 10px;
-  color: #aaa;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+/* Faint top glare to sell the glass look. */
+.screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 45%);
+  pointer-events: none;
 }
 
-.metric-value {
+/* 7-seg-ish digit rows: dark on LCD, monospaced, with a ghost shadow. */
+.line {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f1a0f;
+  letter-spacing: 2px;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0.6px 0 0 rgba(15, 26, 15, 0.18);
+}
+
+.line.tokens {
   font-size: 16px;
-  font-weight: 600;
-  color: #fff;
+  opacity: 0.78;
 }
 
-.metric-value.clickable {
+.line.cny {
+  font-size: 26px;
+}
+
+.line.clickable {
   cursor: pointer;
-  display: inline-flex;
-  gap: 6px;
-  align-items: baseline;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  text-shadow: inherit;
 }
 
-.metric-value.clickable:hover {
-  color: #4a9eff;
-}
-
-.cost-usd {
-  color: #7cc4ff;
-}
-
-.cost-cny {
-  color: #ffc97c;
-  font-size: 13px;
+.line.clickable:hover {
+  color: #1d3a1d;
 }

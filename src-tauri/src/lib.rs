@@ -116,7 +116,7 @@ pub fn run() {
                 WebviewUrl::App("overlay.html".into()),
             )
             .title("cc-monitor")
-            .inner_size(220.0, 70.0)
+            .inner_size(260.0, 96.0)
             .position(cfg.overlay.x as f64, cfg.overlay.y as f64)
             .decorations(false)
             .transparent(true)

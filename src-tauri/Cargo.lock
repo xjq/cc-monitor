@@ -433,7 +433,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "cc-monitor-tmp"
+name = "cc-monitor"
 version = "0.1.0"
 dependencies = [
  "chrono",

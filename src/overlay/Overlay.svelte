@@ -145,19 +145,19 @@
 
   /* Font-scale presets. Keep --w/--h in sync with overlay_size_for() in lib.rs. */
   .size-small {
-    --w: 256px; --h: 144px;
-    --tok: 22px; --cny: 40px;
-    --key: 24px; --keyh: 36px; --keymw: 88px; --keyp: 16px;
+    --w: 192px; --h: 128px;
+    --tok: 20px; --cny: 36px;
+    --key: 22px; --keyh: 32px; --keymw: 80px; --keyp: 14px;
   }
   .size-medium {
-    --w: 320px; --h: 180px;
-    --tok: 28px; --cny: 52px;
-    --key: 30px; --keyh: 44px; --keymw: 104px; --keyp: 20px;
+    --w: 240px; --h: 160px;
+    --tok: 26px; --cny: 46px;
+    --key: 28px; --keyh: 40px; --keymw: 96px; --keyp: 18px;
   }
   .size-large {
-    --w: 384px; --h: 216px;
-    --tok: 34px; --cny: 64px;
-    --key: 36px; --keyh: 52px; --keymw: 120px; --keyp: 24px;
+    --w: 288px; --h: 192px;
+    --tok: 32px; --cny: 56px;
+    --key: 34px; --keyh: 48px; --keymw: 112px; --keyp: 22px;
   }
 
   .error-state {

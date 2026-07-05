@@ -22,9 +22,9 @@ struct DebounceTracker {
 /// Keep in sync with the CSS `--w/--h` vars per `.size-*` class.
 pub fn overlay_size_for(scale: &str) -> (f64, f64) {
     match config::normalize_scale(scale) {
-        "small" => (256.0, 144.0),
-        "large" => (384.0, 216.0),
-        _ => (320.0, 180.0),
+        "small" => (192.0, 128.0),
+        "large" => (288.0, 192.0),
+        _ => (240.0, 160.0),
     }
 }
 
@@ -51,9 +51,9 @@ fn build_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
 
     let show = MenuItem::with_id(app, "show", "显示悬浮窗", true, None::<&str>)?;
     let hide = MenuItem::with_id(app, "hide", "隐藏悬浮窗", true, None::<&str>)?;
-    let fs = CheckMenuItem::with_id(app, "font-small", "小", scale == "small", true, None::<&str>)?;
-    let fm = CheckMenuItem::with_id(app, "font-medium", "中", scale == "medium", true, None::<&str>)?;
-    let fl = CheckMenuItem::with_id(app, "font-large", "大", scale == "large", true, None::<&str>)?;
+    let fs = CheckMenuItem::with_id(app, "font-small", "小", true, scale == "small", None::<&str>)?;
+    let fm = CheckMenuItem::with_id(app, "font-medium", "中", true, scale == "medium", None::<&str>)?;
+    let fl = CheckMenuItem::with_id(app, "font-large", "大", true, scale == "large", None::<&str>)?;
     let font_submenu = Submenu::with_items(app, "字号", true, &[&fs, &fm, &fl])?;
     let relocate = MenuItem::with_id(app, "relocate", "重新定位 DB…", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;

@@ -25,7 +25,8 @@ export function formatHours(hours: number): string {
 function formatCurrency(amount: number, symbol: string): string {
   const sign = amount < 0 ? "-" : "";
   const absValue = Math.abs(amount);
-  return `${sign}${symbol}${absValue.toFixed(2)}`;
+  const formatted = absValue < 10 ? absValue.toFixed(1) : Math.round(absValue).toString();
+  return `${sign}${symbol}${formatted}`;
 }
 
 export function formatUsd(n: number): string {

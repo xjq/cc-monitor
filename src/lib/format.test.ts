@@ -51,26 +51,39 @@ describe("formatHours", () => {
 
 describe("formatUsd", () => {
   it("formats USD with $ symbol", () => {
-    expect(formatUsd(0)).toBe("$0.00");
-    expect(formatUsd(100)).toBe("$100.00");
-    expect(formatUsd(1234.567)).toBe("$1234.57");
+    expect(formatUsd(0)).toBe("$0.0");
+    expect(formatUsd(100)).toBe("$100");
+    expect(formatUsd(1234.567)).toBe("$1235");
+  });
+
+  it("keeps one decimal below 10, integer at 10+", () => {
+    expect(formatUsd(0)).toBe("$0.0");
+    expect(formatUsd(5.5)).toBe("$5.5");
+    expect(formatUsd(9.99)).toBe("$10.0");
+    expect(formatUsd(10)).toBe("$10");
+    expect(formatUsd(12.34)).toBe("$12");
   });
 
   it("handles negative values", () => {
-    expect(formatUsd(-100)).toBe("-$100.00");
-    expect(formatUsd(-50)).toBe("-$50.00");
+    expect(formatUsd(-100)).toBe("-$100");
+    expect(formatUsd(-5.5)).toBe("-$5.5");
   });
 });
 
 describe("formatCny", () => {
   it("formats CNY with ¥ symbol and converts from USD", () => {
-    expect(formatCny(0, 7.2)).toBe("¥0.00");
-    expect(formatCny(100, 7.2)).toBe("¥720.00");
-    expect(formatCny(50, 7.0)).toBe("¥350.00");
-    expect(formatCny(1234.567, 7.2)).toBe("¥8888.88");
+    expect(formatCny(0, 7.2)).toBe("¥0.0");
+    expect(formatCny(100, 7.2)).toBe("¥720");
+    expect(formatCny(1234.567, 7.2)).toBe("¥8889");
+  });
+
+  it("keeps one decimal below 10, integer at 10+", () => {
+    expect(formatCny(1, 7.2)).toBe("¥7.2");
+    expect(formatCny(1.25, 7.2)).toBe("¥9.0");
+    expect(formatCny(2, 7.2)).toBe("¥14");
   });
 
   it("handles negative values", () => {
-    expect(formatCny(-100, 7.2)).toBe("-¥720.00");
+    expect(formatCny(-100, 7.2)).toBe("-¥720");
   });
 });

@@ -107,6 +107,7 @@ If a frontend `listen()` or window op silently does nothing, check this file fir
 4. **Svelte 5:** use `mount(Component, { target })`, not `new Component()`. Don't mix `on:event` and `onevent` syntaxes in one component.
 5. **Window labels** (`overlay`, `detail`) are created in `lib.rs` — never redeclare them in `tauri.conf.json` (Tauri panics "label already exists").
 6. **`<style src="./app.css">` does NOT hot-reload** in vite-plugin-svelte — the external file referenced via `src` isn't watched, so CSS edits silently never reach the running webview (only `.svelte` changes trigger HMR). The overlay learned this the hard way: keep overlay CSS **inlined in `<style>`** inside `Overlay.svelte` (matches `Detail.svelte`). Also wrap `body`/`*` rules in `:global(...)` — Svelte scopes plain selectors to component elements, so a scoped `body { background: transparent }` never applies and the overlay gets a white background.
+7. **`CheckMenuItem::with_id` arg order is `(manager, id, text, enabled, checked, accelerator)`** — `enabled` comes BEFORE `checked` (confusingly the opposite of the struct field order in the builder). Passing `checked` in the `enabled` slot makes non-active items render greyed-out. Verified against `tauri-2.11.5/src/menu/builders/check.rs`.
 
 ## Conventions
 

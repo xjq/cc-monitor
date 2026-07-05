@@ -6,11 +6,17 @@ mod commands;
 mod poller;
 
 use std::time::Duration;
+use std::sync::{Arc, Mutex};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
     Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
+
+struct DebounceTracker {
+    overlay_handle: Option<tauri::async_runtime::JoinHandle<()>>,
+    detail_handle: Option<tauri::async_runtime::JoinHandle<()>>,
+}
 
 fn build_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "显示悬浮窗", true, None::<&str>)?;
@@ -21,7 +27,7 @@ fn build_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
         .tooltip("cc-monitor")
-        .icon(app.default_window_icon().unwrap().clone())
+        .icon(app.default_window_icon().expect("default window icon configured").clone())
         .on_menu_event(|app, e| match e.id.as_ref() {
             "show" => {
                 if let Some(w) = app.get_webview_window("overlay") {
@@ -63,17 +69,38 @@ fn build_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-fn debounce_save_position(app: tauri::AppHandle, label: &str, x: i32, y: i32) {
+fn debounce_save_position(app: tauri::AppHandle, label: &str, x: i32, y: i32, tracker: Arc<Mutex<DebounceTracker>>) {
     let app = app.clone();
     let label = label.to_string();
-    tauri::async_runtime::spawn(async move {
+    let mut guard = tracker.lock().unwrap();
+    let handle_to_abort = if label == "overlay" {
+        guard.overlay_handle.take()
+    } else if label == "detail" {
+        guard.detail_handle.take()
+    } else {
+        None
+    };
+
+    // Abort previous pending task if exists
+    if let Some(prev) = handle_to_abort {
+        prev.abort();
+    }
+
+    let label_for_async = label.clone();
+    let new_handle = tauri::async_runtime::spawn(async move {
         tokio::time::sleep(Duration::from_millis(500)).await;
-        if label == "overlay" {
+        if label_for_async == "overlay" {
             commands::save_overlay_position(app, x, y);
-        } else if label == "detail" {
+        } else if label_for_async == "detail" {
             commands::save_detail_position(app, x, y);
         }
     });
+
+    if label == "overlay" {
+        guard.overlay_handle = Some(new_handle);
+    } else if label == "detail" {
+        guard.detail_handle = Some(new_handle);
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -110,18 +137,26 @@ pub fn run() {
             .visible(false)
             .build()?;
 
+            // Create debounce tracker for position saves
+            let debounce_tracker = Arc::new(Mutex::new(DebounceTracker {
+                overlay_handle: None,
+                detail_handle: None,
+            }));
+
             // Persist window position on move (debounced).
             let app_handle = app.handle().clone();
+            let tracker1 = debounce_tracker.clone();
             overlay.on_window_event(move |e| {
                 if let WindowEvent::Moved(pos) = e {
-                    debounce_save_position(app_handle.clone(), "overlay", pos.x, pos.y);
+                    debounce_save_position(app_handle.clone(), "overlay", pos.x, pos.y, tracker1.clone());
                 }
             });
             let app_handle2 = app.handle().clone();
+            let tracker2 = debounce_tracker.clone();
             if let Some(detail_win) = app.get_webview_window("detail") {
                 detail_win.on_window_event(move |e| {
                     if let WindowEvent::Moved(pos) = e {
-                        debounce_save_position(app_handle2.clone(), "detail", pos.x, pos.y);
+                        debounce_save_position(app_handle2.clone(), "detail", pos.x, pos.y, tracker2.clone());
                     }
                 });
             }

@@ -5,9 +5,9 @@ use crate::{config, db};
 
 pub fn spawn(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
-        let cfg = config::load(&app);
-        let interval = Duration::from_secs(cfg.poll_interval_sec.max(1));
         loop {
+            let cfg = config::load(&app);
+            let interval = Duration::from_secs(cfg.poll_interval_sec.max(1));
             tokio::time::sleep(interval).await;
             match config::resolve_db_path(&app) {
                 None => {

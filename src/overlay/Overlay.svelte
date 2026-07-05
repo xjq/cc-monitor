@@ -2,15 +2,19 @@
   import { onMount } from "svelte";
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/core";
-  import { formatTokens, formatHours, formatUsd, formatCny } from "../lib/format";
+  import { formatTokens, formatUsd, formatCny } from "../lib/format";
 
-  interface Summary {
-    tokens: number;
-    cost_usd: number;
-    hours: number;
+  interface UsageSummary {
+    input_tokens: number;
+    output_tokens: number;
+    cache_read_tokens: number;
+    cache_creation_tokens: number;
+    total_cost_usd: number;
+    request_count: number;
+    unpriced_rows: number;
   }
 
-  let summary: Summary | null = null;
+  let summary: UsageSummary | null = null;
   let dbOk = false;
   let dbMessage = "";
   let usdToCny: number = 7.2;
@@ -70,9 +74,12 @@
   </div>
 {:else}
   <div class="card" data-tauri-drag-region>
+    {#if summary && summary.unpriced_rows > 0}
+      <div class="warn">⚠ {summary.unpriced_rows} 条未定价</div>
+    {/if}
     <div class="metric">
       <span class="metric-label">Tokens</span>
-      <span class="metric-value">{summary ? formatTokens(summary.tokens) : "—"}</span>
+      <span class="metric-value">{summary ? formatTokens(summary.input_tokens + summary.output_tokens + summary.cache_read_tokens + summary.cache_creation_tokens) : "—"}</span>
     </div>
     <div class="metric">
       <span class="metric-label">Cost</span>
@@ -84,18 +91,14 @@
       >
         {#if summary}
           {#if showCostCny}
-            {formatCny(summary.cost_usd, usdToCny)}
+            {formatCny(summary.total_cost_usd, usdToCny)}
           {:else}
-            {formatUsd(summary.cost_usd)}
+            {formatUsd(summary.total_cost_usd)}
           {/if}
         {:else}
           —
         {/if}
       </button>
-    </div>
-    <div class="metric">
-      <span class="metric-label">Hours</span>
-      <span class="metric-value">{summary ? formatHours(summary.hours) : "—"}</span>
     </div>
   </div>
 {/if}

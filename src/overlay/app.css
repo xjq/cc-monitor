@@ -17,14 +17,50 @@ body:active {
   cursor: grabbing;
 }
 
-.overlay {
+.card {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 8px 16px;
-  background: rgba(30, 30, 30, 0.9);
-  border-radius: 8px;
-  backdrop-filter: blur(4px);
+  padding: 8px 12px;
+  background: rgba(20, 20, 28, 0.85);
+  color: #eee;
+  border-radius: 12px;
+  width: 220px;
+  height: 70px;
+  flex-direction: column;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+}
+
+.error-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(20, 20, 28, 0.85);
+  color: #ff6b6b;
+  border-radius: 12px;
+  font-size: 12px;
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.error-state button {
+  background: #4a9eff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.warn {
+  font-size: 10px;
+  color: #ffb347;
+  position: absolute;
+  top: 2px;
+  right: 6px;
 }
 
 .metric {

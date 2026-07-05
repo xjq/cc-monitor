@@ -53,7 +53,7 @@ pub async fn show_detail_window(app: AppHandle) -> Result<(), String> {
 
 /// Open a native file picker and persist the chosen DB path. Returns true on success.
 #[tauri::command]
-pub fn pick_db_path(app: AppHandle) -> Result<bool, String> {
+pub async fn pick_db_path(app: AppHandle) -> Result<bool, String> {
     use tauri_plugin_dialog::DialogExt;
 
     // Use a channel to convert callback to synchronous result
@@ -68,15 +68,21 @@ pub fn pick_db_path(app: AppHandle) -> Result<bool, String> {
             let _ = tx.send(picked);
         });
 
-    // Block waiting for the callback (this is OK in a command context)
-    match rx.recv() {
-        Ok(Some(p)) => {
-            let success = relocate_db_inner(&app, p);
-            Ok(success)
+    // Run the blocking recv on the blocking pool instead of a worker thread
+    let result = tauri::async_runtime::spawn_blocking(move || {
+        match rx.recv() {
+            Ok(Some(p)) => {
+                let mut cfg = config::load(&app);
+                cfg.db_path = Some(p);
+                config::save(&app, &cfg);
+                true
+            }
+            Ok(None) => false,
+            Err(_) => false,
         }
-        Ok(None) => Ok(false),
-        Err(_) => Ok(false),
-    }
+    }).await.map_err(|e| e.to_string())?;
+
+    Ok(result)
 }
 
 #[tauri::command]

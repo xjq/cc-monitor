@@ -105,10 +105,7 @@ If a frontend `listen()` or window op silently does nothing, check this file fir
 ## Conventions
 
 - **TDD** for pure logic: `format.ts` (vitest), `config.rs`/`db.rs` (cargo test, in-memory SQLite). UI wiring isn't unit-tested.
-- **Commit style:** conventional commits (`feat:`, `fix:`, `chore:`, `docs:`). End every commit with:
-  ```
-  Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
-  ```
+- **Commit style:** conventional commits (`feat:`, `fix:`, `chore:`, `docs:`). Subject + body only — do **not** append any `Co-Authored-By: Claude` trailer (user preference; see memory `no-claude-coauthor`).
 - **Read-only DB:** `OpenFlags::SQLITE_OPEN_READ_ONLY | SQLITE_OPEN_NO_MUTEX` + `PRAGMA query_only=1`. Never write to cc-switch's DB.
 
 ## Design docs & history

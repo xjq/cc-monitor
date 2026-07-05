@@ -25,12 +25,9 @@
     }
   }
 
-  async function handleDbStatus(event: any) {
-    dbOk = event.payload.found === true;
+  function handleDbStatus(event: { payload: { ok: boolean; message: string } }) {
+    dbOk = event.payload.ok;
     dbMessage = event.payload.message || "";
-    if (event.payload.found) {
-      summary = event.payload.summary;
-    }
   }
 
   async function handleUsageUpdate(event: any) {

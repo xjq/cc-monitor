@@ -23,6 +23,8 @@ pub struct Config {
     pub poll_interval_sec: u64,
     #[serde(default = "default_rate")]
     pub usd_to_cny: f64,
+    #[serde(default = "default_font_scale", rename = "font_scale")]
+    pub font_scale: String,
     #[serde(default)]
     pub overlay: WindowState,
     #[serde(default = "default_detail")]
@@ -31,7 +33,16 @@ pub struct Config {
 
 fn default_poll() -> u64 { 3 }
 fn default_rate() -> f64 { 7.2 }
+fn default_font_scale() -> String { "medium".into() }
 fn default_detail() -> WindowState { WindowState { x: 800, y: 400, visible: false } }
+
+/// Clamp an arbitrary scale string to one of the supported levels.
+pub fn normalize_scale(s: &str) -> &str {
+    match s {
+        "small" | "medium" | "large" => s,
+        _ => "medium",
+    }
+}
 
 impl Default for Config {
     fn default() -> Self {
@@ -39,6 +50,7 @@ impl Default for Config {
             db_path: None,
             poll_interval_sec: 3,
             usd_to_cny: 7.2,
+            font_scale: "medium".into(),
             overlay: WindowState { x: 1600, y: 40, visible: true },
             detail: WindowState { x: 800, y: 400, visible: false },
         }
@@ -100,6 +112,7 @@ mod tests {
     #[test]
     fn from_json_roundtrip() {
         let cfg = Config { db_path: Some("C:/x.db".into()), poll_interval_sec: 5, usd_to_cny: 7.0,
+            font_scale: "large".into(),
             overlay: WindowState { x: 10, y: 20, visible: true },
             detail: WindowState { x: 30, y: 40, visible: false } };
         let text = serde_json::to_string(&cfg).unwrap();
@@ -107,8 +120,25 @@ mod tests {
         assert_eq!(back.db_path.as_deref(), Some("C:/x.db"));
         assert_eq!(back.poll_interval_sec, 5);
         assert!((back.usd_to_cny - 7.0).abs() < 1e-9);
+        assert_eq!(back.font_scale, "large");
         assert_eq!(back.overlay.x, 10);
         assert_eq!(back.detail.visible, false);
+    }
+
+    #[test]
+    fn normalize_scale_clamps_unknown() {
+        assert_eq!(normalize_scale("small"), "small");
+        assert_eq!(normalize_scale("medium"), "medium");
+        assert_eq!(normalize_scale("large"), "large");
+        assert_eq!(normalize_scale("bogus"), "medium");
+        assert_eq!(normalize_scale(""), "medium");
+    }
+
+    #[test]
+    fn from_json_missing_font_scale_defaults_medium() {
+        let text = r#"{"usd_to_cny":6.5}"#;
+        let cfg = Config::from_json(text);
+        assert_eq!(cfg.font_scale, "medium");
     }
 
     #[test]

@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 use crate::{config, db, models::TodayDetail};
 
@@ -88,5 +88,26 @@ pub async fn pick_db_path(app: AppHandle) -> Result<bool, String> {
 #[tauri::command]
 pub fn get_settings(app: AppHandle) -> serde_json::Value {
     let cfg = config::load(&app);
-    serde_json::json!({ "usd_to_cny": cfg.usd_to_cny, "poll_interval_sec": cfg.poll_interval_sec })
+    serde_json::json!({
+        "usd_to_cny": cfg.usd_to_cny,
+        "poll_interval_sec": cfg.poll_interval_sec,
+        "font_scale": config::normalize_scale(&cfg.font_scale),
+    })
+}
+
+/// Set the overlay font scale (small/medium/large), persist it, resize the
+/// overlay window, and broadcast the change to the frontend.
+#[tauri::command]
+pub fn set_font_scale(app: AppHandle, scale: String) -> Result<(), String> {
+    let scale = config::normalize_scale(&scale).to_string();
+    let mut cfg = config::load(&app);
+    cfg.font_scale = scale.clone();
+    config::save(&app, &cfg);
+
+    if let Some(w) = app.get_webview_window("overlay") {
+        let (ww, hh) = crate::overlay_size_for(&scale);
+        let _ = w.set_size(tauri::LogicalSize::new(ww, hh));
+    }
+    let _ = app.emit("font-scale-changed", &scale);
+    Ok(())
 }
